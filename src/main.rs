@@ -2,13 +2,13 @@ use std::fmt;
 use std::fmt::Display;
 use std::iter;
 
-struct Tower {
+struct Disk {
     weight : usize,
 }
 
-impl Tower {
-    pub fn new(weight: usize) -> Tower {
-        Tower { weight : weight }
+impl Disk {
+    pub fn new(weight: usize) -> Disk {
+        Disk { weight : weight }
     }
 
     pub fn weight(&self) -> usize {
@@ -16,30 +16,30 @@ impl Tower {
     }
 }
 
-impl Display for Tower {
+impl Display for Disk {
     fn fmt(&self, f : &mut fmt::Formatter) -> fmt::Result {
         f.write_fmt(format_args!("[{0}]", iter::repeat("#").take(self.weight()).collect::<String>()))
     }
 }
 
 struct Rod {
-    stack : Vec<Tower>,
+    stack : Vec<Disk>,
 }
 
 impl Rod {
     pub fn new(sizes : &[usize]) -> Rod {
-        Rod { stack : sizes.iter().map(|x| Tower::new(*x) ).collect::<Vec<_>>() }
+        Rod { stack : sizes.iter().map(|x| Disk::new(*x) ).collect::<Vec<_>>() }
     }
 
-    fn can_take_tower(&self, tower : &Tower) -> bool {
+    fn can_move_disk(&self, disk : &Disk) -> bool {
         match self.stack.last() {
             None => true,
-            Some(t) => t.weight() > tower.weight(),
+            Some(t) => t.weight() > disk.weight(),
         }
     }
 
-    pub fn can_take(&self, other: &Rod) -> bool {
-        false // self.can_take_tower(&other.stack.last())
+    pub fn can_move(&self, other: &Rod) -> bool {
+        false // self.can_take_disk(&other.stack.last())
     }
 
     pub fn swap(& mut self, other: &mut Rod) -> &mut Self {
@@ -73,10 +73,9 @@ impl Display for Desk {
             let mut s : String = "  ".to_string();
 
             for rod in &self.rods {
-                let stower: Option<&Tower> = rod.stack.get(i);
-                let tmp = match stower {
+                let tmp = match rod.stack.get(i) {
                     None => format!("{0}|{0}", dup(" ", max_weight + 1)),
-                    Some(tower) => format!("{1}[{0}|{0}]{1}", dup("#", tower.weight()), dup(" ", max_weight - tower.weight())),
+                    Some(disk) => format!("{1}[{0}|{0}]{1}", dup("#", disk.weight()), dup(" ", max_weight - disk.weight())),
                 };
                 s.push_str(" ");
                 s.push_str(&tmp);
