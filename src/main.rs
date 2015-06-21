@@ -3,6 +3,10 @@ use std::fmt::Display;
 use std::iter;
 use std::io;
 
+#[macro_use]
+extern crate log;
+
+#[derive(Debug)]
 struct Disk {
     weight : usize,
 }
@@ -23,9 +27,11 @@ impl Display for Disk {
     }
 }
 
+#[derive(Debug)]
 struct Rod {
     stack : Vec<Disk>,
 }
+
 
 impl Rod {
     pub fn new(sizes : &[usize]) -> Rod {
@@ -47,7 +53,8 @@ impl Rod {
     }
 
     pub fn take_from(& mut self, other: &mut Rod) -> bool {
-        if !self.can_move(other) {
+        if self.can_move(other) {
+            trace!("Will take {0:?} <- {1:?}", self, other);
             self.stack.push(other.stack.pop().expect("can_move returned true"));
             true
         } else {
@@ -66,30 +73,43 @@ impl Desk {
         Desk { rods : rods.iter().map(|x| Rod::new(*x) ).collect::<Vec<_>>() }
     }
 
+    pub fn new_default(count : usize) -> Desk {
+        let tmp = (1 .. count+1).rev().collect::<Vec<usize>>();
+
+        let first: &[usize] = &tmp[ .. ];
+        Desk::new(&[
+            &first,
+            &[],
+            &[]
+        ])
+    }
+
     pub fn is_done(&self) -> bool {
         self.rods.iter().take(self.rods.len() -1).all(|r| r.stack.is_empty())
     }
 
-    fn _take_give(&mut self, from: usize, to: usize) -> bool {
-        assert!(from < to);
-        let (x, y) = self.rods.split_at_mut(to);
+    pub fn move_disk(&mut self, from: usize, to: usize) -> bool {
+        let from_rod;
+        let to_rod;
 
-        let from_rod = x.get_mut(from);
-        let to_rod = y.get_mut(0);
+        if from < to {
+            let (x, y) = self.rods.split_at_mut(to);
+
+            from_rod = x.get_mut(from);
+            to_rod = y.get_mut(0);
+        } else if to < from {
+            let (x, y) = self.rods.split_at_mut(from);
+
+            from_rod = y.get_mut(0);
+            to_rod = x.get_mut(to);
+        } else {
+            from_rod = None;
+            to_rod = None;
+        }
 
         match (to_rod, from_rod) {
             (Some(a), Some(b)) => a.take_from(b),
             _ => false,
-        }
-    }
-
-    pub fn move_disk(&mut self, from: usize, to: usize) -> bool {
-        if from == to {
-            false 
-        } else if from < to {
-            self._take_give(from, to)
-        } else {
-            self._take_give(to, from)
         }
     }
 }
@@ -143,19 +163,19 @@ fn read_move() ->(usize, usize) {
 }
 
 fn main() {
-    let desk = &mut Desk::new(&[
-        &[10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
-        &[],
-        &[]
-    ]);
+    let desk = &mut Desk::new_default(10);
 
     while !desk.is_done() {
         println!("{0}", desk);
 
-        println!("Your move: [from] [to]");
+        println!("Your move [from] [to]: ");
         let (from, to) = read_move();
         println!("Moving from {0} -> {1}", from, to);
-        desk.move_disk(from -1, to -1);
+
+        match desk.move_disk(from -1, to -1) {
+            false => println!("Could not perfrom such move"),
+            true => (),
+        }
     }
 
     println!("Game over, you win");

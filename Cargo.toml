@@ -2,3 +2,6 @@
 name = "hanoi-tower"
 version = "0.1.0"
 authors = ["Leonids Maslovs <leonids.maslovs@galeoconsulting.com>"]
+
+[dependencies]
+log = "0.3.1"
