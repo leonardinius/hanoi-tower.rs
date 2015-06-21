@@ -1,2 +1,2 @@
 #!/bin/sh
-pynvim "+colo flatui" "+AutoSaveToggle"  "+set mouse=a" src/main.rs 2>&1 1>/tmp/pynvim.$$.out &
+pynvim "+colo cake16" "+AutoSaveToggle"  "+set mouse=a" src/main.rs 2>&1 1>/tmp/pynvim.$$.out &
