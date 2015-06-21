@@ -22,14 +22,32 @@ struct Desk {
 
 impl Display for Desk {
     fn fmt(&self, f : &mut fmt::Formatter) -> fmt::Result {
-        let max_weight = 
+        let max_weight : usize = 
             self.rods.iter()
                 .map(|r| r.stack.iter().map(|s| s.weight).max().unwrap_or(0))
                 .max().unwrap_or(0);
-        let height = max_weight + 2usize;
+        let height = max_weight + 1;
 
-        let width = 2 + ((max_weight + 2) * self.rods.len()) + 2;
+        let dup = |s: &str, n: usize| iter::repeat(s).take(n).collect::<String>();
         let mut display : Vec<String> = Vec::new();
+
+        for i in 0..height {
+            let mut s : String = "  ".to_string();
+
+            for rod in &self.rods {
+                let stower: Option<&Tower> = rod.stack.get(i);
+                let tmp = match stower {
+                    None => format!("{0}|{0}", dup(" ", max_weight + 1)),
+                    Some(tower) => format!("{1}[{0}|{0}]{1}", dup("#", tower.weight), dup(" ", max_weight - tower.weight)),
+                };
+                s.push_str(" ");
+                s.push_str(&tmp);
+            }
+
+            s.push_str("  ");
+            s.push_str("\n");
+            display.push(s);
+        }
 
         display.reverse();
         f.write_fmt(format_args!("{0}", display.connect("")))
@@ -37,6 +55,29 @@ impl Display for Desk {
 }
 
 fn main() {
-    let t  =  Tower { weight : 10,  };
-    println!("Hello, world! {0}", t);
+    let desk1 = Desk {
+        rods : vec![
+            Rod { stack:  vec![ Tower {weight: 4, }, Tower {weight: 3, }, ], },
+            Rod { stack:  vec![ Tower {weight: 2, }, ], },
+            Rod { stack:  vec![ Tower {weight: 1, }, ], },
+        ],
+    };
+    println!("{0}", desk1);
+
+    let desk2 = Desk {
+        rods : vec![
+            Rod { stack:  vec![ Tower {weight: 4, }, Tower {weight: 2, }, ], },
+            Rod { stack:  vec![ Tower {weight: 3, }, ], },
+            Rod { stack:  vec![ Tower {weight: 1, }, ], },
+        ],
+    };
+    println!("{0}", desk2);
+
+    let desk3 = Desk {
+        rods : vec![
+            Rod { stack:  vec![ Tower {weight: 4, }, Tower {weight: 2, }, ], },
+            Rod { stack:  vec![ Tower {weight: 3, }, Tower {weight: 1 }, ], },
+        ],
+    };
+    println!("{0}", desk3);
 }
