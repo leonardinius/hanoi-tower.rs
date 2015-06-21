@@ -1,0 +1,4 @@
+[package]
+name = "hanoi-tower"
+version = "0.1.0"
+authors = ["Leonids Maslovs <leonids.maslovs@galeoconsulting.com>"]
