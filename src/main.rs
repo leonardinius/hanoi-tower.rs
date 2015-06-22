@@ -1,3 +1,5 @@
+#![feature(slice_patterns)]
+
 use std::fmt;
 use std::fmt::Display;
 use std::iter;
@@ -5,6 +7,7 @@ use std::io;
 
 #[macro_use]
 extern crate log;
+
 
 #[derive(Debug)]
 struct Disk {
@@ -92,12 +95,12 @@ impl Desk {
         let from_rod;
         let to_rod;
 
-        if from < to {
+        if from < to && to < self.rods.len() {
             let (x, y) = self.rods.split_at_mut(to);
 
             from_rod = x.get_mut(from);
             to_rod = y.get_mut(0);
-        } else if to < from {
+        } else if to < from && from < self.rods.len() {
             let (x, y) = self.rods.split_at_mut(from);
 
             from_rod = y.get_mut(0);
@@ -156,10 +159,14 @@ fn read_move() ->(usize, usize) {
         .expect("Failed to read line");
 
     let splits = buffer.trim().split(' ').collect::<Vec<&str>>();
-    let from = splits[0].trim().parse::<usize>().unwrap_or(1);
-    let to = splits[1].trim().parse::<usize>().unwrap_or(1);
-
-    (from, to)
+    match &splits[ .. ] {
+        [ from, to ] => (
+                from.trim().parse::<usize>().unwrap_or(1),
+                to.trim().parse::<usize>().unwrap_or(1)
+            ),
+        _ => (1, 1),
+        //[] | [_] | [_, _, ..]=> (1, 1),
+    }
 }
 
 fn main() {
